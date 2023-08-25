@@ -14,7 +14,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/event")
+@RequestMapping("/api/event")
 public class EventController {
 
     private final EventService eventService;
@@ -41,5 +41,10 @@ public class EventController {
     @ResponseStatus(HttpStatus.OK)
     public List<EventDTO> getAllEvents(@RequestParam(required = false) String location, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDate, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDate, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         return eventService.getFilteredEvents(location, startDate, endDate, page, size);
+    }
+    @DeleteMapping("/{eventId}")
+    @ResponseStatus(HttpStatus.OK)
+    public EventDTO deleteEventById(@PathVariable Long eventId) {
+        return eventService.getEventById(eventId);
     }
 }

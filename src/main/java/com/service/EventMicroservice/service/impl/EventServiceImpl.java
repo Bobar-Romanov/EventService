@@ -81,6 +81,17 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public EventDTO deleteEventById(Long eventId) {
+        Optional<Event> optionalEvent = eventRepository.findById(eventId);
+        if (optionalEvent.isEmpty()) {
+            throw new EntityNotFoundException("Event not found with id: " + eventId);
+        }
+        eventRepository.delete(optionalEvent.get());
+        log.info("Event delete by id: {}", eventId);
+        return modelMapper.map(optionalEvent.get(), EventDTO.class);
+    }
+
+    @Override
     public List<EventDTO> getFilteredEvents(String location, LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("date").ascending());
         Page<Event> eventPage = eventRepository.findAllFiltered(location, startDate, endDate, pageRequest);

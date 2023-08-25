@@ -17,6 +17,7 @@ public interface EventService {
     EventDTO addEvent(@Valid Long userId, @Valid EventCreationDTO dto);
     boolean isEventHasTimeConflict(Event event);
     EventDTO getEventById(Long eventId);
+    EventDTO deleteEventById(Long eventId);
 
     List<EventDTO> getFilteredEvents(String location, LocalDateTime startDate, LocalDateTime endDate, int page, int size);
 
