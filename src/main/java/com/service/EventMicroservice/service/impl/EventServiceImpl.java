@@ -95,7 +95,7 @@ public class EventServiceImpl implements EventService {
     public List<EventDTO> getFilteredEvents(String location, LocalDateTime startDate, LocalDateTime endDate, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("date").ascending());
         Page<Event> eventPage = eventRepository.findAllFiltered(location, startDate, endDate, pageRequest);
-        log.info("Events get in the amount of", eventPage.getTotalElements());
+        log.info("Events get in the amount of {}", eventPage.getTotalElements());
         return eventPage.stream().map(event -> modelMapper.map(event, EventDTO.class)).collect(Collectors.toList());
     }
 

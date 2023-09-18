@@ -23,9 +23,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         //http.authenticationProvider(ssoAuthenticationProvider)
-                http.addFilterBefore(new SSOAuthenticationFilter(restTemplate), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new SSOAuthenticationFilter(restTemplate), UsernamePasswordAuthenticationFilter.class);
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.DELETE,"/api/event/*")
+                .requestMatchers(HttpMethod.DELETE, "/api/event/*")
                 .hasRole("ADMIN")
                 .anyRequest()
                 .authenticated());
@@ -36,13 +36,9 @@ public class SecurityConfig {
                 );
 
 
-
         return http.build();
 
     }
-
-
-
 
 
 }

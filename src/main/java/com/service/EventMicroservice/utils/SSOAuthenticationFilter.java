@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +27,8 @@ public class SSOAuthenticationFilter extends OncePerRequestFilter {
 
 
     private final RestTemplate restTemplate;
+    @Value("${sso.service.url}")
+    private String ssoServiceUrl;
 
 
     private String extractTokenFromRequest(HttpServletRequest request) {
@@ -35,8 +38,8 @@ public class SSOAuthenticationFilter extends OncePerRequestFilter {
     private List<SimpleGrantedAuthority> authenticateWithSso(String token) throws JsonProcessingException {
         log.info("request preparation: {}", "token = " + token);
 
-        String ssoServiceUrl = "http://localhost:8080/api/auth/check-token?token=" + token;
-        String jsonResponse = restTemplate.getForObject(ssoServiceUrl, String.class);
+        String ssoServiceUrlResponse = ssoServiceUrl + "?token=" + token;
+        String jsonResponse = restTemplate.getForObject(ssoServiceUrlResponse, String.class);
 
         ObjectMapper objectMapper = new ObjectMapper();
         CustomGrantedAuthorityDeserializer[] deserializedArray = objectMapper.readValue(jsonResponse, CustomGrantedAuthorityDeserializer[].class);
@@ -44,7 +47,7 @@ public class SSOAuthenticationFilter extends OncePerRequestFilter {
         List<SimpleGrantedAuthority> authorities = Arrays.stream(deserializedArray)
                 .map(customAuthority -> new SimpleGrantedAuthority(customAuthority.getAuthority()))
                 .collect(Collectors.toList());
-
+        log.info("authorities: {}", authorities);
         return authorities;
     }
 
@@ -53,14 +56,14 @@ public class SSOAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-            String token = extractTokenFromRequest(request);
-            if (token != null) {
-                List<SimpleGrantedAuthority> authorities = authenticateWithSso(token);
-                if (authorities != null && !authorities.isEmpty()) {
-                    SsoAuthenticationToken authentication = new SsoAuthenticationToken(token, authorities);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
+        String token = extractTokenFromRequest(request);
+        if (token != null) {
+            List<SimpleGrantedAuthority> authorities = authenticateWithSso(token);
+            if (authorities != null && !authorities.isEmpty()) {
+                SsoAuthenticationToken authentication = new SsoAuthenticationToken(token, authorities);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+        }
         filterChain.doFilter(request, response);
     }
 }
